@@ -19,6 +19,6 @@ driver = openStack(user,
 print driver.list_nodes()
 
 amazon = get_driver(Provider.EC2_EU_WEST)
-driver = amazon(accesskey, secretkey)
+driver = amazon(accessKey, secretKey)
 
 print driver.list_nodes()

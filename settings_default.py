@@ -1,6 +1,6 @@
 # Amazon
-accesskey = ''
-secretkey = ''
+accessKey = ''
+secretKey = ''
 
 # OpenStack
 user = ''
