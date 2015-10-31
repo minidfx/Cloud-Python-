@@ -1,25 +1,26 @@
-from libcloud.compute.types import Provider, NodeState
-from libcloud.compute.providers import get_driver
-import time
+# Getting started with OpenStack using libcloud
+# http://developer.openstack.org/firstapp-libcloud/getting_started.html
 
+from libcloud.compute.types import Provider
+from libcloud.compute.providers import get_driver
+
+from Cloud import Cloud
 from settings import *
 
 
-class OpenStack:
+class OpenStack(Cloud):
     def __init__(self):
-        # Get the OpenStack drivers
+        super().__init__()
         openstack = get_driver(Provider.OPENSTACK)
-
-        # Init the driver
         self.driver = openstack(user,
                                 password,
-                                ex_tenant_name=tenant_name,
-                                ex_force_auth_url=auth_url,
-                                ex_force_auth_version='2.0_password',
-                                ex_force_service_region=service_region)
+                                ex_tenant_name = tenant_name,
+                                ex_force_auth_url = auth_url,
+                                ex_force_auth_version = '2.0_password',
+                                ex_force_service_region = service_region)
 
     def create(self):
-        print('Reading available infrastructure from Swith-Engine ...')
+        print('Retrieving infrastructure information from SwitchEngines ...')
 
         sizes = self.driver.list_sizes()
         images = self.driver.list_images()
@@ -27,45 +28,40 @@ class OpenStack:
         networks = self.driver.ex_list_networks()
         ips = self.driver.ex_list_floating_ips()
 
+        print('Done.')
+
         size = [s for s in sizes if s.name == 'c1.micro'][0]
         image = [s for s in images if s.id == '93231f46-2e7c-4d3a-838d-460492e6e266'][0]
         security_group = [s for s in security_groups if s.name == 'anywhere'][0]
         network = [s for s in networks if s.name == 'My network'][0]
         ip = [s for s in ips if s.id == '5e378f57-2499-49c0-984a-1bb80102894b'][0]
 
-        print("Creating a new node ...")
+        print('Creating a new node ...')
 
         # Create a micro node
-        self.driver.create_node(name='MongoDB',
-                                size=size,
-                                image=image,
-                                ex_security_groups=[security_group],
-                                ex_keyname='switch-engine',
-                                networks=[network])
+        node = self.driver.create_node(name = 'MongoDB',
+                                       size = size,
+                                       image = image,
+                                       ex_security_groups = [security_group],
+                                       ex_keyname = 'switch-engine',
+                                       networks = [network])
 
-        print("Created")
+        print('Done.')
+        print('Waiting for MongoDB ...')
 
-        nodes = self.driver.list_nodes()
-        node = [s for s in nodes if s.name == 'MongoDB'][0]
-
-        while node.state != NodeState.RUNNING:
-            print('Waiting for MongoDB ...')
-            time.sleep(1)
-
-            nodes = self.driver.list_nodes()
-            node = [s for s in nodes if s.name == 'MongoDB'][0]
-
+        self.driver.wait_until_running([node])
         self.activeNode = node
+
         print('Instance ready.')
-        print('Attaching an IP address ...')
+        print('Attaching a Public IP ...')
 
         self.driver.ex_attach_floating_ip_to_node(node, ip)
 
-        print("IP address attached.")
+        print('Done.')
 
     def destroy(self):
-        print("Destroying the previous one created ...")
+        print('Destroying the instance on SwitchEngines ...')
 
         self.activeNode.destroy()
 
-        print("Destroyed")
+        print('Done.')
