@@ -64,7 +64,8 @@ class Amazon(Cloud):
         # print('Done.')
         print('Destroying the instance on Amazon ...')
 
-        self.activeNode.destroy()
+        for node in self.activeNodes:
+            node.destroy()
 
         print('Done.')
         print('Deleting the keypair ...')
