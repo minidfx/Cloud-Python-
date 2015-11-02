@@ -10,11 +10,11 @@ from settings import *
 
 class OpenStack(Cloud):
     def __init__(self):
-        super().__init__()
+        super(self).__init__()
         openstack = get_driver(Provider.OPENSTACK)
         self.driver = openstack(user,
                                 password,
-                                ex_tenant_name = tenant_name,
+                                ex_tenant_name = tenant,
                                 ex_force_auth_url = auth_url,
                                 ex_force_auth_version = '2.0_password',
                                 ex_force_service_region = service_region)
@@ -36,10 +36,15 @@ class OpenStack(Cloud):
         network = [s for s in networks if s.name == 'My network'][0]
         ip = [s for s in ips if s.id == '5e378f57-2499-49c0-984a-1bb80102894b'][0]
 
+        self.__run_instance('MongoDB', size, image, security_group, network)
+        self.__run_instance('RESTServer', size, image, security_group, network)
+        self.__run_instance('RESTClient', size, image, security_group, network)
+
+    def __run_instance(self, instancename, size, image, security_group, network):
         print('Creating a new node ...')
 
         # Create a micro node
-        node = self.driver.create_node(name = 'MongoDB',
+        node = self.driver.create_node(name = instancename,
                                        size = size,
                                        image = image,
                                        ex_security_groups = [security_group],

@@ -10,7 +10,7 @@ from settings import *
 
 class Amazon(Cloud):
     def __init__(self):
-        super().__init__()
+        super(self).__init__()
         amazon = get_driver(Provider.EC2_EU)
         self.driver = amazon(accessKey, secretKey)
         self.publicIP = None
