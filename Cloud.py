@@ -6,7 +6,7 @@ class Cloud(object):
 
     def __init__(self):
         self.driver = None
-        self.activeNode = None
+        self.activeNodes = []
 
     @abstractmethod
     def create(self):

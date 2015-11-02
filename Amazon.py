@@ -10,7 +10,7 @@ from settings import *
 
 class Amazon(Cloud):
     def __init__(self):
-        super(self).__init__()
+        super().__init__()
         amazon = get_driver(Provider.EC2_EU)
         self.driver = amazon(accessKey, secretKey)
         self.publicIP = None
@@ -42,7 +42,7 @@ class Amazon(Cloud):
         print('Waiting for MongoDB ...')
 
         self.driver.wait_until_running([node])
-        self.activeNode = node
+        self.activeNodes.append(node)
 
         print('Instance ready.')
         # Doesn't work with EC2: https://github.com/boto/boto/issues/2727
