@@ -1,10 +1,8 @@
 # Getting started with OpenStack using libcloud
 # http://developer.openstack.org/firstapp-libcloud/getting_started.html
-from libcloud.compute.ssh import BaseSSHClient
-
+from libcloud.compute.ssh import *
 from libcloud.compute.types import Provider
 from libcloud.compute.providers import get_driver
-
 from Cloud import Cloud
 from settings import *
 
@@ -16,7 +14,7 @@ class OpenStack(Cloud):
         openstack = get_driver(Provider.OPENSTACK)
         self.driver = openstack(user,
                                 password,
-                                ex_tenant_name = tenant,
+                                ex_tenant_name = tenant_name,
                                 ex_force_auth_url = auth_url,
                                 ex_force_auth_version = '2.0_password',
                                 ex_force_service_region = service_region)
@@ -46,7 +44,7 @@ class OpenStack(Cloud):
 
     @staticmethod
     def __additionalOperations(restServerIP, restClientIP, mongoDbIp):
-        clientSSH = BaseSSHClient(restServerIP, username='ubuntu')
+        clientSSH = ShellOutSSHClient(restServerIP, username = 'ubuntu')
         clientSSH.connect()
 
         try:
@@ -54,7 +52,7 @@ class OpenStack(Cloud):
         finally:
             clientSSH.close()
 
-        clientSSH = BaseSSHClient(restClientIP, username='ubuntu')
+        clientSSH = ShellOutSSHClient(restClientIP, username = 'ubuntu')
         clientSSH.connect()
 
         try:
