@@ -1,6 +1,5 @@
 # Getting started with OpenStack using libcloud
 # http://developer.openstack.org/firstapp-libcloud/getting_started.html
-from pydoc import cli
 from libcloud.compute.ssh import BaseSSHClient
 
 from libcloud.compute.types import Provider
@@ -43,15 +42,25 @@ class OpenStack(Cloud):
         restServerIP = self.__run_instance('RESTServer', size, images, security_group, network)
         restClientIP = self.__run_instance('RESTClient', size, images, security_group, network)
 
+        self.__additionalOperations(restServerIP, restClientIP, mongoDbIp)
+
+    @staticmethod
+    def __additionalOperations(restServerIP, restClientIP, mongoDbIp):
         clientSSH = BaseSSHClient(restServerIP, username='ubuntu')
         clientSSH.connect()
-        clientSSH.run('python /home/ubuntu/Downloads/pyserver.py %s &' % mongoDbIp)
-        clientSSH.close()
+
+        try:
+            clientSSH.run('python /home/ubuntu/Downloads/pyserver.py %s &' % mongoDbIp)
+        finally:
+            clientSSH.close()
 
         clientSSH = BaseSSHClient(restClientIP, username='ubuntu')
         clientSSH.connect()
-        clientSSH.run('python /home/ubuntu/Downloads/pyclient.py %s &' % mongoDbIp)
-        clientSSH.close()
+
+        try:
+            clientSSH.run('python /home/ubuntu/Downloads/pyclient.py %s &' % mongoDbIp)
+        finally:
+            clientSSH.close()
 
     def __run_instance(self, instancename, size, images, security_group, network):
         print('Creating a new node ...')
@@ -90,7 +99,7 @@ class OpenStack(Cloud):
         print('Destroying the instance on SwitchEngines ...')
 
         for node in self.activeNodes:
-             node.destroy()
+            node.destroy()
 
         for ip in self.activeIps:
             self.driver.ex_delete_floating_ip(ip)
